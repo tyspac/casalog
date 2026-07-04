@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(OWNER)
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  properties Property[]
+  vehicles   Vehicle[]
+  services   Service[]
+}
+
+model Property {
+  id              String   @id @default(cuid())
+  name            String
+  address         String
+  city            String
+  state           String
+  zipCode         String?
+  catastalCode    String?
+  waterAccount    String?
+  lightAccount    String?
+  internetAccount String?
+  notes           String?
+  imageUrl        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  owner    User             @relation(fields: [ownerId], references: [id])
+  ownerId  String
+  services Service[]
+  details  PropertyDetail[]
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  brand     String
+  model     String
+  year      Int
+  plates    String?
+  vin       String?
+  color     String?
+  notes     String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner    User      @relation(fields: [ownerId], references: [id])
+  ownerId  String
+  services Service[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+  cost        Float?
+  serviceDate DateTime
+  techName    String?
+  techPhone   String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner      User      @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  vehicle    Vehicle?  @relation(fields: [vehicleId], references: [id])
+  vehicleId  String?
+}
+
+model PropertyDetail {
+  id         String   @id @default(cuid())
+  label      String
+  value      String
+  category   String
+  createdAt  DateTime @default(now())
+
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+}
+
+enum Role {
+  OWNER
+  TECHNICIAN
+  PROVIDER
+  ADMIN
+}
